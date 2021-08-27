@@ -64,12 +64,13 @@ const Transition = React.forwardRef( function Transition(
 export default function FullScreenDialog() {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
-    
+    const [loading, setLoading] = React.useState(false);
     const [search, setSearch] = useState('');
     const [searchedMovies, setSearchedMovies] = useState<Movie[]>([]);
 
     useEffect( () => {
         if( !!search ) {
+            setLoading(true);
             api.get('/3/search/movie', {
                 params: {
                     'query': search
@@ -77,6 +78,7 @@ export default function FullScreenDialog() {
             }).then( response => {
                 const data = response.data;
                 const sortedMovies = !!data && !!data.results ? data.results.sort( (a: Movie, b: Movie) => ( b.vote_average > a.vote_average ? 1 : -1) ) : [];
+                setLoading(false);
                 return setSearchedMovies(sortedMovies)
             });
         }
@@ -118,7 +120,7 @@ export default function FullScreenDialog() {
             </Container>
             </AppBar>
             <Cards movies={searchedMovies} />
-        { !!search && searchedMovies.length === 0  &&
+        { !!search && !loading && searchedMovies.length === 0 &&
              <Error> 
                 <h1> Não há resultados para sua busca.</h1>
              </Error>
